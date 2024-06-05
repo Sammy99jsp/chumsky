@@ -908,6 +908,22 @@ impl<'a, 'parse, I: Input<'a>> Marker<'a, 'parse, I> {
             phantom: PhantomData,
         }
     }
+
+    pub fn raw(&self) -> I::Offset {
+        self.offset
+    }
+
+    /// Artificially make a marker from an offset.
+    ///
+    /// ### Safety
+    /// `offset` must within the bounds of the input.
+    pub unsafe fn from_raw(offset: I::Offset, err_count: usize) -> Self {
+        Self {
+            offset,
+            err_count,
+            phantom: PhantomData,
+        }
+    }
 }
 
 impl<'a, 'parse, I: Input<'a>> Copy for Marker<'a, 'parse, I> {}
@@ -924,6 +940,24 @@ impl<'a, 'parse, I: Input<'a>> Clone for Marker<'a, 'parse, I> {
 pub struct Offset<'a, 'parse, I: Input<'a>> {
     pub(crate) offset: I::Offset,
     phantom: PhantomData<fn(&'parse ()) -> &'parse ()>, // Invariance
+}
+
+impl<'a, 'parse, I: Input<'a>> Offset<'a, 'parse, I> {
+    /// Artificially create an offset, such as from an external
+    /// parser.
+    ///
+    /// ### Safety
+    /// `offset` must within the bounds of the input.
+    unsafe fn from_raw(offset: I::Offset) -> Self {
+        Self {
+            offset,
+            phantom: PhantomData,
+        }
+    }
+
+    pub fn raw(&self) -> I::Offset {
+        self.offset
+    }
 }
 
 impl<'a, 'parse, I: Input<'a>> Copy for Offset<'a, 'parse, I> {}
